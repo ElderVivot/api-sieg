@@ -1,3 +1,5 @@
+const path = require('path')
+
 const zeroLeft = (valueInsert, countZeros=2) => {
     return ("0000".repeat(countZeros) + valueInsert).slice(-countZeros);
   }
@@ -18,4 +20,4 @@ const zeroLeft = (valueInsert, countZeros=2) => {
   module.exports.zeroLeft = zeroLeft
   module.exports.daysInitialAndEndOfMonth = daysInitialAndEndOfMonth
   module.exports.wayMainToSaveXML = 'Y:\\7-DEPTO FISCAL\\9999 - XMLs'
-  module.exports.wayToSaveLog = 'C:\\temp\\notas-fiscais\\logs'
+  module.exports.wayToSaveLog = `${path.join(__dirname, '../..')}\\exportData\\logs`

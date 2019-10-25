@@ -1,17 +1,21 @@
 const fs = require('fs');
 
-const createPasteToSaveXML = (wayBase, nameEmp, codiEmp, monthYear, operationNF, typeNF) => {
+const createPasteToSaveXML = (wayBase, nameEmp, codiEmp, year, month, operationNF, typeNF) => {
     let wayToSaveXMLs = wayBase
   
     let namePasteCompanie = `${nameEmp.substring(0, 70)} - ${codiEmp}`
     fs.existsSync(`${wayToSaveXMLs}\\${namePasteCompanie}`) || fs.mkdirSync(`${wayToSaveXMLs}\\${namePasteCompanie}`)
     wayToSaveXMLs = `${wayToSaveXMLs}\\${namePasteCompanie}`
   
-    let namePasteMonthYear = monthYear
-    fs.existsSync(`${wayToSaveXMLs}\\${namePasteMonthYear}`) || fs.mkdirSync(`${wayToSaveXMLs}\\${namePasteMonthYear}`)
-    wayToSaveXMLs = `${wayToSaveXMLs}\\${namePasteMonthYear}`
+    let namePasteYear = year
+    fs.existsSync(`${wayToSaveXMLs}\\${namePasteYear}`) || fs.mkdirSync(`${wayToSaveXMLs}\\${namePasteYear}`)
+    wayToSaveXMLs = `${wayToSaveXMLs}\\${namePasteYear}`
+
+    let namePasteMonth = month
+    fs.existsSync(`${wayToSaveXMLs}\\${namePasteMonth}`) || fs.mkdirSync(`${wayToSaveXMLs}\\${namePasteMonth}`)
+    wayToSaveXMLs = `${wayToSaveXMLs}\\${namePasteMonth}`
   
-    // entradas or saídas
+    // entradas ou saídas
     let namePasteOperationNF = operationNF
     fs.existsSync(`${wayToSaveXMLs}\\${namePasteOperationNF}`) || fs.mkdirSync(`${wayToSaveXMLs}\\${namePasteOperationNF}`)
     wayToSaveXMLs = `${wayToSaveXMLs}\\${namePasteOperationNF}`
