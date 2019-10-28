@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-const searchNotas = (cnpj, typeCNPJ="cnpjDest", typeNF="nfe", dateInicial, dateFinal, skip=0) => {
+const searchNotas = (cnpj, typeCNPJ, typeNF, dateInicial, dateFinal, skip=0) => {
     // JSON to connect API SIEG
     let jsonRequest = {
       "apikey": "49wxHodcRPiPcEqDQAJuQg==",

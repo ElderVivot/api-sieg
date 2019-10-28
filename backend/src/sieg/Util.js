@@ -5,11 +5,9 @@ const zeroLeft = (valueInsert, countZeros=2) => {
   }
 
  const daysInitialAndEndOfMonth = (month, year) => {
-    const dateInitial = new Date(`${year}-${month}-01`)
+    const dateInitial = new Date(year, month-1, 1)
   
-    const dateEnd = new Date(`${year}-${month}-01`)
-    dateEnd.setMonth(dateEnd.getMonth() + 1)
-    dateEnd.setDate(dateEnd.getDate()-1)
+    const dateEnd = new Date(year, month, 0)
     
     return{
       dateInitial: `${dateInitial.getFullYear()}-${zeroLeft(dateInitial.getMonth()+1)}-${zeroLeft(dateInitial.getDate())}`, 
@@ -17,7 +15,9 @@ const zeroLeft = (valueInsert, countZeros=2) => {
     }
   }
 
+  // console.log(daysInitialAndEndOfMonth(12,2019))
+
   module.exports.zeroLeft = zeroLeft
   module.exports.daysInitialAndEndOfMonth = daysInitialAndEndOfMonth
-  module.exports.wayMainToSaveXML = 'Y:\\7-DEPTO FISCAL\\9999 - XMLs'
+  module.exports.wayMainToSaveXML = 'C:\\temp\\notas-fiscais'
   module.exports.wayToSaveLog = `${path.join(__dirname, '../..')}\\exportData\\logs`

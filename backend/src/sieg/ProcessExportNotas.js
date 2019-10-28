@@ -1,4 +1,9 @@
-const exportsNotas = require('./ExportsNotas')
+const shell = require('shelljs')
 
-exportsNotas.exportNotas("cnpjDest", "nfe")
-exportsNotas.exportNotas("cnpjDest", "cte")
+// console.log(process.argv[2])
+
+shell.exec(`node ${__dirname}/ExportsNotas.js cnpjDest nfe`)
+shell.exec(`node ${__dirname}/ExportsNotas.js cnpjDest cte`)
+
+// exportsNotas.exportNotas("cnpjDest", "nfe")
+// exportsNotas.exportNotas("cnpjDest", "cte")

@@ -5,11 +5,15 @@ const util = require('./Util')
 const createPasteToSaveXMLs = require('./CreatePasteToSaveXML')
 const searchNotas = require('./SearchNotas')
 
-console.log(path.join(__dirname, '../..'))
-
 // define the way to read companies
 let wayCompanies = `${path.join(__dirname, '../..')}\\exportData\\companies.json`
 const companiesValues = require(wayCompanies)
+
+let waySkip = `${path.join(__dirname, '../..')}\\exportData\\skips.json`
+if(!fs.existsSync(waySkip)){
+  fs.writeFileSync(waySkip, JSON.stringify({}))
+}
+const skipValues = require(waySkip)
 
 const dateActual = new Date()
 // will only current year and last year
@@ -23,7 +27,7 @@ for(i=0; i<=dateActual.getMonth(); i++){
 }
 
 // execute export xmls
-const exportNotas = async (typeCNPJ, typeNF) => {
+const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => {
 
   let wayMain = util.wayMainToSaveXML
   let wayLog = util.wayToSaveLog
@@ -56,46 +60,70 @@ const exportNotas = async (typeCNPJ, typeNF) => {
 
       for(month of monthsRead){
 
+        let skip = 0
+
         let date = util.daysInitialAndEndOfMonth(month, year)
         let dateInitialFormatted = date.dateInitial
         let dateEndFormatted = date.dateEnd
 
-        let skip = 0
+        // while(True){
+          try {
+            const notas = await searchNotas.searchNotas(companie.cgce_emp, typeCNPJ, typeNF, dateInitialFormatted, dateEndFormatted, skip)
+  
+            //  generates only when exists NFs in the month
+            if (notas.length >= 1) {
+              fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `Codigo Empresa;Nome Empresa;CNPJ Empresa;Mes-Ano;Chave NF-e;Tipo CNPJ Busca;Tipo Nota Busca\n`)
+            
+              let wayToSaveXML = createPasteToSaveXMLs.createPasteToSaveXML(wayMain, companie.nome_emp, companie.codi_emp, year, util.zeroLeft(month), forderTypeCNPJ, folderTypeNF)
+      
+              notas.forEach( (nota, indice) => {
+                let xmlDecode = new Buffer(nota, 'base64').toString('ascii');
+                xmlToJson = JSON.parse(xmljs.xml2json(xmlDecode))
+                
+                let keyNF = xmlToJson.elements[0].elements[0].elements[0].attributes.Id
+                
+                fs.writeFileSync(`${wayToSaveXML}\\${keyNF}.xml`, xmlDecode, 'utf8')
+  
+                console.log(`* Exportado ${util.zeroLeft(indice+1)}/${util.zeroLeft(notas.length)}: ${keyNF} do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`)
+                
+                fs.appendFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
+            })
 
-        try {
-          const notas = await searchNotas.searchNotas(companie.cgce_emp, typeCNPJ, typeNF, dateInitialFormatted, dateEndFormatted)
-
-          //  generates only when exists NFs in the month
-          if (notas.length >= 1) {
-            fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `Codigo Empresa;Nome Empresa;CNPJ Empresa;Mes-Ano;Chave NF-e;Tipo CNPJ Busca;Tipo Nota Busca\n`)
-          
-            let wayToSaveXML = createPasteToSaveXMLs.createPasteToSaveXML(wayMain, companie.nome_emp, companie.codi_emp, year, util.zeroLeft(month), forderTypeCNPJ, folderTypeNF)
-    
-            notas.forEach( (nota, indice) => {
-              let xmlDecode = new Buffer(nota, 'base64').toString('ascii');
-              xmlToJson = JSON.parse(xmljs.xml2json(xmlDecode))
-              
-              let keyNF = xmlToJson.elements[0].elements[0].elements[0].attributes.Id
-              
-              fs.writeFileSync(`${wayToSaveXML}\\${keyNF}.xml`, xmlDecode, 'utf8')
-
-              console.log(`* Exportado ${util.zeroLeft(indice+1)}/${util.zeroLeft(notas.length)}: ${keyNF} do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`)
-              
-              fs.appendFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
-          })
-          } else {
-            let textShow = `* Não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
+            // skip++
+            // break
+            } else {
+              let textShow = `* Não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
+              console.log(textShow)
+              fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-no${typeNF}.csv`, textShow)
+            }
+          } catch (error) {
+            let textShow = `* Erro no mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ} --> ${error}`
             console.log(textShow)
-            fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-no${typeNF}.csv`, textShow)
+            fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-error${typeNF}.csv`, textShow)
           }
-        } catch (error) {
-          let textShow = `* Erro para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ} --> ${error}`
-          console.log(textShow)
-          fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-error${typeNF}.csv`, textShow)
-        }
+        // }
       }
     }
   }
 }
 
-module.exports.exportNotas = exportNotas
+function loopExportNotas(){
+  return new Promise((resolve, reject) => {
+      setTimeout( async () => {
+        try {
+          resolve(await exportNotas())
+          setTimeout(loopExportNotas)
+        } catch (error) {
+          reject('* Erro no loop de exportação das notas')
+          // mesmo com o erro vai tentar executar novamente
+          setTimeout(loopExportNotas)
+        }
+      });
+  })
+}
+
+const execExportNotas = async () => {
+  await loopExportNotas()
+}
+
+execExportNotas()
