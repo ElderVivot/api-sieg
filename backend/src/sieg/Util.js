@@ -19,5 +19,5 @@ const zeroLeft = (valueInsert, countZeros=2) => {
 
   module.exports.zeroLeft = zeroLeft
   module.exports.daysInitialAndEndOfMonth = daysInitialAndEndOfMonth
-  module.exports.wayMainToSaveXML = 'C:\\temp\\notas-fiscais'
+  module.exports.wayMainToSaveXML = 'Y:\\7-DEPTO FISCAL\\9999 - XMLs'
   module.exports.wayToSaveLog = `${path.join(__dirname, '../..')}\\exportData\\logs`
