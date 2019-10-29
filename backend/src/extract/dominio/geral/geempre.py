@@ -17,7 +17,11 @@ class extractGeempre():
             self._cursor = self._connection.cursor()
             sql = (f"SELECT codi_emp, nome_emp, cgce_emp, stat_emp, dina_emp "
                     f"FROM bethadba.geempre "
-                    f"WHERE ( dina_emp >= YMD(year(today()), month(today())-5, 1) OR ( stat_emp NOT IN ('I') ) )"
+                    f"WHERE codi_emp < 9969 "
+                    f"  AND ( dina_emp >= YMD(year(today()), month(today())-5, 1) OR ( stat_emp NOT IN ('I') ) )"
+                    f"  AND tins_emp = 1"
+                    f"  AND cgce_emp IS NOT NULL"
+                    f"  AND TRIM( COALESCE(cgce_emp, '')) <> '' "
                     f"ORDER BY codi_emp")
             self._cursor.execute(sql)
 
