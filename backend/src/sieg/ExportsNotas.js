@@ -73,6 +73,7 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
           let filterMonthYear = filterCompanie.map(companieFilter => companieFilter.valuesCompetencia)[0].filter(monthYear => monthYear.year == year && monthYear.month == month)
           let filterSkip = filterMonthYear.map(monthYear => monthYear.valuesForFilterSkip)[0].filter(filterSkip => filterSkip.typeCNPJ == typeCNPJ && filterSkip.typeNF == typeNF)
           skip = filterSkip[0].skip
+          lengthNotas = filterSkip[0].lengthNotas
         } catch (error) {
           skip = undefined
         }
@@ -80,14 +81,16 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
         if(skip == undefined){
             try {
               skip = 0
+              lengthNotas = 0
               createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, 0)
-              fs.writeFile(waySkip, JSON.stringify(skipValues), error => {
+              fs.writeFileSync(waySkip, JSON.stringify(skipValues)/*, error => {
                 if(error){
                   console.log('* Não foi possível atualizar o arquivo skips.json')
                 }
-              })
+              }*/)
             } catch (error) {
               skip = 0
+              lengthNotas = 0
               console.log('* Não foi possível criar o objeto skips.json')
             }
         }
@@ -96,6 +99,16 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
 
           try {
             const notas = await searchNotas.searchNotas(companie.cgce_emp, typeCNPJ, typeNF, dateInitialFormatted, dateEndFormatted, skip)
+
+            // analista se os xmls já não foram exportados
+            if(notas.length >= 1 && notas.length < 50){
+              if(notas.length == lengthNotas){
+                let textShow = `* No skip ${skip} não há nenhuma nota ** NOVA ** do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
+                console.log(textShow)
+                fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-nonova${typeNF}.csv`, textShow)
+                break
+              }
+            }
 
             //  generates only when exists NFs in the month
             if (notas.length >= 1) {
@@ -116,18 +129,20 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
                 fs.appendFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
               })
 
-              if(notas.length < 50){
-                break
-              }
-              skip++
-              createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, 0)
-              fs.writeFile(waySkip, JSON.stringify(skipValues), error => {
+              createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, notas.length)
+              fs.writeFileSync(waySkip, JSON.stringify(skipValues)/*, error => {
                 if(error){
                   console.log('* Não foi possível atualizar o arquivo skips.json')
                 }
-              })
+              }*/)
+              
+              if(notas.length < 50){
+                break
+              }
+
+              skip++
             } else {
-              let textShow = `* Não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
+              let textShow = `* No skip ${skip} não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
               console.log(textShow)
               fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-no${typeNF}.csv`, textShow)
               break
@@ -144,25 +159,25 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
   }
 }
 
-exportNotas()
+// exportNotas()
 
-// function loopExportNotas(){
-//   return new Promise((resolve, reject) => {
-//       setTimeout( async () => {
-//         try {
-//           resolve(await exportNotas())
-//           setTimeout(loopExportNotas)
-//         } catch (error) {
-//           reject('* Erro no loop de exportação das notas')
-//           // mesmo com o erro vai tentar executar novamente
-//           setTimeout(loopExportNotas)
-//         }
-//       });
-//   })
-// }
+function loopExportNotas(){
+  return new Promise((resolve, reject) => {
+      setTimeout( async () => {
+        try {
+          resolve(await exportNotas())
+          setTimeout(loopExportNotas)
+        } catch (error) {
+          reject('* Erro no loop de exportação das notas')
+          // mesmo com o erro vai tentar executar novamente
+          setTimeout(loopExportNotas)
+        }
+      });
+  })
+}
 
-// const execExportNotas = async () => {
-//   await loopExportNotas()
-// }
+const execExportNotas = async () => {
+  await loopExportNotas()
+}
 
-// execExportNotas()
+execExportNotas()

@@ -1,4 +1,4 @@
-let skipValues = []
+skipValues = []
 
 function createObjSkip(skipValues = [], codi_emp, year, month, typeCNPJ, typeNF, skip, length){
 
@@ -11,11 +11,19 @@ function createObjSkip(skipValues = [], codi_emp, year, month, typeCNPJ, typeNF,
         // faz a mesma lógica da empresa, mas agora pra competência (mes e ano), se não existir cai no else e adiciona um novo. Se já existir utiliza ele
         let existsPeriod = objSkip.valuesCompetencia.filter(value => value.year == year && value.month == month)
         if(existsPeriod.length > 0){
+            
             // faz a mesma lógica do período mas selecionando o tipo do CNPJ e NF, se não existir cai no else e adiciona um novo (push). Se já existir SUBSTITUI os valores dele
             let existsTypeCNPJAndNF = existsPeriod[0].valuesForFilterSkip.filter(value => value.typeCNPJ == typeCNPJ && value.typeNF == typeNF)
-            // console.log(existsTypeCNPJAndNF)
             if(existsTypeCNPJAndNF.length > 0){
-                existsPeriod[0].valuesForFilterSkip.pop()
+                // deleta todos os valores que existe com o mesmo typeCNPJ e typeNF
+                existsTypeCNPJAndNF.forEach( valueTypeCNPJAndNf => {
+                    let i = 0
+                    while ((i = existsPeriod[0].valuesForFilterSkip.indexOf(valueTypeCNPJAndNf)) != -1) {
+                        existsPeriod[0].valuesForFilterSkip.splice(i, 1);
+                    }
+                })
+                // console.log(existsPeriod[0].valuesForFilterSkip)
+                // após excluído, está livre pra inserir um novo valor
                 existsPeriod[0].valuesForFilterSkip.push({
                     typeCNPJ: typeCNPJ,
                     typeNF: typeNF,
@@ -78,12 +86,22 @@ module.exports.createObjSkip = createObjSkip
 
 // ------------- objetos adicionados manualmente pra teste
 // createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "nfe", 1, 20)
-// createObjSkip( skipValues,1, 2019, 10, "cnpjDest", "nfe", 0, 17)
-// createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "nfe", 2, 19)
-// createObjSkip(skipValues, 1, 2019, 9, "cnpjDest", "cte", 0, 20)
+// createObjSkip( skipValues,1, 2019, 10,  0, 17)
+// createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "nfe", 0, 17)
+// createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "nfe", 2, 18)
+// createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "cte", 0, 18)
+// createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "cte", 0, 15)
+// createObjSkip(skipValues, 1, 2019, 10, "cnpjEmit", "nfse", 0, 15)
+// createObjSkip(skipValues, 2, 2019, 10, "cnpjDest", "cte", 0, 17)
+// createObjSkip( skipValues,2, 2019, 10, "cnpjDest", "nfe", 0, 14)
+// createObjSkip( skipValues,2, 2019, 10, "cnpjDest", "nfe", 0, 11)
+// createObjSkip(skipValues, 1, 2019, 10, "cnpjDest", "cte", 2, 19)
+// createObjSkip(skipValues, 2, 2019, 10, "cnpjDest", "cte", 0, 20)
 // createObjSkip(skipValues, 1, 2019, 9, "cnpjDest", "nfe", 0, 15)
 // createObjSkip(skipValues, 1, 2019, 9, "cnpjDest", "nfe", 0, 18)
-// createObjSkip(skipValues, 2, 2019, 9, "cnpjDest", "nfe", 0, 17)
+// createObjSkip(skipValues, 3, 2019, 9, "cnpjDest", "cte", 0, 17)
+// createObjSkip(skipValues, 3, 2019, 9, "cnpjDest", "nfe", 0, 17)
+// createObjSkip(skipValues, 1117, 2019, 10, "cnpjDest", "cte", 0, 23)
 
 // console.log(JSON.stringify(skipValues, undefined, 4))
 

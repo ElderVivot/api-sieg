@@ -17,7 +17,7 @@ class extractGeempre():
             self._cursor = self._connection.cursor()
             sql = (f"SELECT codi_emp, nome_emp, cgce_emp, stat_emp, dina_emp "
                     f"FROM bethadba.geempre "
-                    f"WHERE cgce_emp IN ('03457169000163', '04605182000185')"
+                    f"WHERE ( dina_emp >= YMD(year(today()), month(today())-5, 1) OR ( stat_emp NOT IN ('I') ) )"
                     f"ORDER BY codi_emp")
             self._cursor.execute(sql)
 
