@@ -22,7 +22,6 @@ function createObjSkip(skipValues = [], codi_emp, year, month, typeCNPJ, typeNF,
                         existsPeriod[0].valuesForFilterSkip.splice(i, 1);
                     }
                 })
-                // console.log(existsPeriod[0].valuesForFilterSkip)
                 // após excluído, está livre pra inserir um novo valor
                 existsPeriod[0].valuesForFilterSkip.push({
                     typeCNPJ: typeCNPJ,

@@ -12,7 +12,7 @@ const companiesValues = require(wayCompanies)
 
 // define the way to read skips, which will identify which last processing was stopped
 let skipValues = []
-let waySkip = `${path.join(__dirname, '../..')}\\exportData\\skips.json`
+let waySkip = `${path.join(__dirname, '../..')}\\exportData\\skips-${process.argv[2]}-${process.argv[3]}.json`
 if(!fs.existsSync(waySkip)){
   fs.writeFileSync(waySkip, JSON.stringify(skipValues))
 }
@@ -79,20 +79,8 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
         }
 
         if(skip == undefined){
-            try {
-              skip = 0
-              lengthNotas = 0
-              createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, 0)
-              fs.writeFileSync(waySkip, JSON.stringify(skipValues)/*, error => {
-                if(error){
-                  console.log('* Não foi possível atualizar o arquivo skips.json')
-                }
-              }*/)
-            } catch (error) {
-              skip = 0
-              lengthNotas = 0
-              console.log('* Não foi possível criar o objeto skips.json')
-            }
+            skip = 0
+            lengthNotas = 0
         }
 
         while(true){
