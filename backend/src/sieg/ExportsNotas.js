@@ -36,7 +36,7 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
   let wayMain = util.wayMainToSaveXML
   let wayLog = util.wayToSaveLog
 
-  if(typeCNPJ == "cnpjEmit" || typeCNPJ == "cnpjRemet"){
+  if(typeCNPJ == "cnpjEmit"){
     forderTypeCNPJ = "Saidas"
   } else{
     forderTypeCNPJ = "Entradas"
