@@ -18,6 +18,8 @@ const searchNotas = (cnpj, typeCNPJ, typeNF, dateInicial, dateFinal, skip=0) => 
       jsonRequest[typeCNPJ] = `${cnpj}`
     } else if(typeCNPJ=="cnpjRemet"){
       jsonRequest[typeCNPJ] = `${cnpj}`
+    } else if(typeCNPJ=="cnpjTom"){
+      jsonRequest[typeCNPJ] = `${cnpj}`
     } else{
       jsonRequest["cnpjDest"] = `${cnpj}`
     }
