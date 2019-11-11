@@ -28,7 +28,7 @@ monthsOfYear = []
 for(i=0; i<=dateActual.getMonth(); i++){
   monthsOfYear.push(i+1)
 }
-monthsOfYear = [7,8,9,10]
+monthsOfYear = [7,8,9,10,11]
 
 // execute export xmls
 const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => {
