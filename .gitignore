@@ -164,3 +164,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# adicionados manualmente
+backend/exportData/*.json
