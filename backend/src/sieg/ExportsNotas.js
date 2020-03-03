@@ -10,9 +10,16 @@ const createObjSkip = require('./CreateObjSkip')
 let wayCompanies = `${path.join(__dirname, '../..')}\\exportData\\companies.json`
 const companiesValues = require(wayCompanies)
 
+typeCNPJFilter = process.argv[2]
+typeNFFilter = process.argv[3]
+isEventFilter = process.argv[4]
+if(isEventFilter !== "canc"){
+  isEventFilter = ""
+}
+
 // define the way to read skips, which will identify which last processing was stopped
 let skipValues = []
-let waySkip = `${path.join(__dirname, '../..')}\\exportData\\skips-${process.argv[2]}-${process.argv[3]}.json`
+let waySkip = `${path.join(__dirname, '../..')}\\exportData\\skips-${typeCNPJFilter}-${typeNFFilter}-${isEventFilter}.json`
 if(!fs.existsSync(waySkip)){
   fs.writeFileSync(waySkip, JSON.stringify(skipValues))
 }
@@ -31,7 +38,7 @@ for(i=0; i<=dateActual.getMonth(); i++){
 // monthsOfYear = [7,8,9,10,11,12]
 
 // execute export xmls
-const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => {
+const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent=isEventFilter) => {
 
   let wayMain = util.wayMainToSaveXML
   let wayLog = util.wayToSaveLog
@@ -50,6 +57,12 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
     folderTypeNF = "NFS-e"
   } else if(typeNF == "nfce"){
     folderTypeNF = "NFC-e"
+  }
+
+  if(isEvent == "canc"){
+    filterEvents = true
+  } else {
+    filterEvents = false
   }
 
   for(companie of companiesValues){
@@ -86,8 +99,8 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
         while(true){
 
           try {
-            const notas = await searchNotas.searchNotas(companie.cgce_emp, typeCNPJ, typeNF, dateInitialFormatted, dateEndFormatted, skip)
-
+            const notas = await searchNotas.searchNotas(companie.cgce_emp, typeCNPJ, typeNF, dateInitialFormatted, dateEndFormatted, filterEvents, skip)
+            
             // analista se os xmls já não foram exportados
             if(notas.length >= 1 && notas.length < 50){
               if(notas.length == lengthNotas){
@@ -108,13 +121,28 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
                 let xmlDecode = new Buffer(nota, 'base64').toString('ascii');
                 xmlToJson = JSON.parse(xmljs.xml2json(xmlDecode))
                 
-                let keyNF = xmlToJson.elements[0].elements[0].elements[0].attributes.Id
+                let keyNF = ''
+                if(filterEvents == true){
+                  keyNF = xmlToJson.elements[0].elements[0].elements[0].attributes.Id
+
+                  let eventNF = keyNF.substring(2, 8)
+
+                  // ignora os eventos que não são de cancelamento
+                  if(eventNF !== "110111" && eventNF !== "110112" && eventNF !== "310611"){
+                    return undefined
+                  }
+
+                  keyNF = `${keyNF.substring(8, 52)}_canc`
+                  console.log(keyNF)
+                } else {
+                  keyNF = xmlToJson.elements[0].elements[0].elements[0].attributes.Id
+                }
                 
                 fs.writeFileSync(`${wayToSaveXML}\\${keyNF}.xml`, xmlDecode, 'utf8')
 
                 console.log(`* Exportando skip ${skip} - nota ${util.zeroLeft(indice+1)}/${util.zeroLeft(notas.length)}: ${keyNF} do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`)
                 
-                fs.appendFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
+                // fs.appendFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
               })
 
               createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, notas.length)
@@ -130,13 +158,13 @@ const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => 
 
               skip++
             } else {
-              let textShow = `* No skip ${skip} não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
+              let textShow = `* No skip ${skip} não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents}`
               console.log(textShow)
               fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-no${typeNF}.csv`, textShow)
               break
             }
           } catch (error) {
-            let textShow = `* Erro no mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ} --> ${error}`
+            let textShow = `* Erro no mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents} --> ${error}`
             console.log(textShow)
             fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-error${typeNF}.csv`, textShow)
             break

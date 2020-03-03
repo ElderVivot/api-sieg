@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-const searchNotas = (cnpj, typeCNPJ, typeNF, dateInicial, dateFinal, skip=0) => {
+const searchNotas = (cnpj, typeCNPJ, typeNF, dateInicial, dateFinal, filterEvents, skip=0) => {
     // JSON to connect API SIEG
     let jsonRequest = {
       "apikey": "49wxHodcRPiPcEqDQAJuQg==",
@@ -9,7 +9,8 @@ const searchNotas = (cnpj, typeCNPJ, typeNF, dateInicial, dateFinal, skip=0) => 
       "take": 50,
       "skip": skip,
       "dataInicio": `${dateInicial}`,
-      "dataFim": `${dateFinal}`
+      "dataFim": `${dateFinal}`,
+      "downloadevent": `${filterEvents}`
     }
   
     if(typeCNPJ=="cnpjDest"){
