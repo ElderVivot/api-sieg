@@ -20,7 +20,7 @@ skipValues = require(waySkip)
 
 const dateActual = new Date()
 // will only current year and last year
-yearsRead = [dateActual.getFullYear()]
+yearsRead = [dateActual.getFullYear()-1, dateActual.getFullYear()]
 // this is util for last year, that is necessary read every months of year
 allMonthsOfYear = [1,2,3,4,5,6,7,8,9,10,11,12]
 // this is util for current year, where should read future months
@@ -28,7 +28,7 @@ monthsOfYear = []
 for(i=0; i<=dateActual.getMonth(); i++){
   monthsOfYear.push(i+1)
 }
-monthsOfYear = [7,8,9,10,11]
+// monthsOfYear = [7,8,9,10,11,12]
 
 // execute export xmls
 const exportNotas = async (typeCNPJ=process.argv[2], typeNF=process.argv[3]) => {
