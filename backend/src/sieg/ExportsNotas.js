@@ -27,7 +27,7 @@ skipValues = require(waySkip)
 
 const dateActual = new Date()
 // will only current year and last year
-yearsRead = [dateActual.getFullYear()-1, dateActual.getFullYear()]
+yearsRead = [dateActual.getFullYear()]
 // this is util for last year, that is necessary read every months of year
 allMonthsOfYear = [1,2,3,4,5,6,7,8,9,10,11,12]
 // this is util for current year, where should read future months
@@ -101,19 +101,19 @@ const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent
           try {
             const notas = await searchNotas.searchNotas(companie.cgce_emp, typeCNPJ, typeNF, dateInitialFormatted, dateEndFormatted, filterEvents, skip)
             
-            // analista se os xmls já não foram exportados
+            // analisa se os xmls já não foram exportados
             if(notas.length >= 1 && notas.length < 50){
               if(notas.length == lengthNotas){
-                let textShow = `* No skip ${skip} não há nenhuma nota ** NOVA ** do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`
+                let textShow = `* No skip ${skip} não há nenhuma nota ** NOVA ** do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}=${isEventFilter}`
                 console.log(textShow)
-                fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-nonova${typeNF}.csv`, textShow)
+                fs.writeFileSync(`${wayLog}\\not_exist_new_note\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${isEventFilter}.csv`, textShow)
                 break
               }
             }
 
             //  generates only when exists NFs in the month
             if (notas.length >= 1) {
-              fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `Codigo Empresa;Nome Empresa;CNPJ Empresa;Mes-Ano;Chave NF-e;Tipo CNPJ Busca;Tipo Nota Busca\n`)
+              fs.writeFileSync(`${wayLog}\\ok\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}-${isEventFilter}.csv`, `Codigo Empresa;Nome Empresa;CNPJ Empresa;Mes-Ano;Chave NF-e;Tipo CNPJ Busca;Tipo Nota Busca\n`)
             
               let wayToSaveXML = createPasteToSaveXMLs.createPasteToSaveXML(wayMain, companie.nome_emp, companie.codi_emp, year, util.zeroLeft(month), forderTypeCNPJ, folderTypeNF)
       
@@ -140,9 +140,9 @@ const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent
                 
                 fs.writeFileSync(`${wayToSaveXML}\\${keyNF}.xml`, xmlDecode, 'utf8')
 
-                console.log(`* Exportando skip ${skip} - nota ${util.zeroLeft(indice+1)}/${util.zeroLeft(notas.length)}: ${keyNF} do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}`)
+                console.log(`* Exportando skip ${skip} - nota ${util.zeroLeft(indice+1)}/${util.zeroLeft(notas.length)}: ${keyNF} do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents}`)
                 
-                // fs.appendFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
+                fs.appendFileSync(`${wayLog}\\ok\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${isEventFilter}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
               })
 
               createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, notas.length)
@@ -160,13 +160,13 @@ const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent
             } else {
               let textShow = `* No skip ${skip} não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents}`
               console.log(textShow)
-              fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-no${typeNF}.csv`, textShow)
+              fs.writeFileSync(`${wayLog}\\not_exist_note\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${isEventFilter}.csv`, textShow)
               break
             }
           } catch (error) {
             let textShow = `* Erro no mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents} --> ${error}`
             console.log(textShow)
-            fs.writeFileSync(`${wayLog}\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-error${typeNF}.csv`, textShow)
+            fs.writeFileSync(`${wayLog}\\errors\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${isEventFilter}.csv`, textShow)
             break
           }
         }
