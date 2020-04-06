@@ -106,14 +106,14 @@ const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent
               if(notas.length == lengthNotas){
                 let textShow = `* No skip ${skip} não há nenhuma nota ** NOVA ** do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}=${isEventFilter}`
                 console.log(textShow)
-                fs.writeFileSync(`${wayLog}\\not_exist_new_note\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${isEventFilter}.csv`, textShow)
+                fs.writeFileSync(`${wayLog}\\not_exist_new_note\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${typeCNPJ}-${isEventFilter}.csv`, textShow)
                 break
               }
             }
 
             //  generates only when exists NFs in the month
             if (notas.length >= 1) {
-              fs.writeFileSync(`${wayLog}\\ok\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-ok${typeNF}-${isEventFilter}.csv`, `Codigo Empresa;Nome Empresa;CNPJ Empresa;Mes-Ano;Chave NF-e;Tipo CNPJ Busca;Tipo Nota Busca\n`)
+              fs.writeFileSync(`${wayLog}\\ok\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${typeCNPJ}-${isEventFilter}.csv`, `Codigo Empresa;Nome Empresa;CNPJ Empresa;Mes-Ano;Chave NF-e;Tipo CNPJ Busca;Tipo Nota Busca\n`)
             
               let wayToSaveXML = createPasteToSaveXMLs.createPasteToSaveXML(wayMain, companie.nome_emp, companie.codi_emp, year, util.zeroLeft(month), forderTypeCNPJ, folderTypeNF)
       
@@ -142,7 +142,7 @@ const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent
 
                 console.log(`* Exportando skip ${skip} - nota ${util.zeroLeft(indice+1)}/${util.zeroLeft(notas.length)}: ${keyNF} do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents}`)
                 
-                fs.appendFileSync(`${wayLog}\\ok\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${isEventFilter}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
+                fs.appendFileSync(`${wayLog}\\ok\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${typeCNPJ}-${isEventFilter}.csv`, `${companie.codi_emp};${companie.nome_emp};${companie.cgce_emp};${util.zeroLeft(month)}-${year};${keyNF};${typeCNPJ};${typeNF}\n`)
               })
 
               createObjSkip.createObjSkip(skipValues, companie.codi_emp, year, month, typeCNPJ, typeNF, skip, notas.length)
@@ -160,13 +160,13 @@ const exportNotas = async (typeCNPJ=typeCNPJFilter, typeNF=typeNFFilter, isEvent
             } else {
               let textShow = `* No skip ${skip} não há nenhuma nota do mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents}`
               console.log(textShow)
-              fs.writeFileSync(`${wayLog}\\not_exist_note\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${isEventFilter}.csv`, textShow)
+              fs.writeFileSync(`${wayLog}\\not_exist_note\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${typeCNPJ}-${isEventFilter}.csv`, textShow)
               break
             }
           } catch (error) {
             let textShow = `* Erro no mês ${year}-${util.zeroLeft(month)} para empresa ${companie.codi_emp} - ${companie.nome_emp} - CNPJ ${companie.cgce_emp} / Tipo ${typeNF}-${typeCNPJ}-events=${filterEvents} --> ${error}`
             console.log(textShow)
-            fs.writeFileSync(`${wayLog}\\errors\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${isEventFilter}.csv`, textShow)
+            fs.writeFileSync(`${wayLog}\\errors\\${companie.codi_emp}-${year}-${util.zeroLeft(month)}-${skip}-${typeNF}-${typeCNPJ}-${isEventFilter}.csv`, textShow)
             break
           }
         }
